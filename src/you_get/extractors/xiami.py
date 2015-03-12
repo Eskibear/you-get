@@ -78,7 +78,7 @@ def xiami_download_showcollect(cid, output_dir = '.', merge = True, info_only = 
     tracks = doc.getElementsByTagName("track")
     track_nr = 1
     for i in tracks:
-        artist=album_name=song_title=url=""
+        song_id=artist=album_name=song_title=url=""
         try:
             song_id = i.getElementsByTagName("song_id")[0].firstChild.nodeValue
             artist = i.getElementsByTagName("artist")[0].firstChild.nodeValue
@@ -110,15 +110,21 @@ def xiami_download_showcollect(cid, output_dir = '.', merge = True, info_only = 
 def xiami_download_album(aid, output_dir = '.', merge = True, info_only = False):
     xml = get_html('http://www.xiami.com/song/playlist/id/%s/type/1' % aid, faker = True)
     album_name = r1(r'<album_name><!\[CDATA\[(.*)\]\]>', xml)
-    artist = r1(r'<artist><!\[CDATA\[(.*)\]\]>', xml)
     doc = parseString(xml)
-    output_dir = output_dir + "/%s - %s" % (artist, album_name)
+    output_dir = output_dir + "/%s" % (album_name)
     tracks = doc.getElementsByTagName("track")
     track_nr = 1
     pic_exist = False
     for i in tracks:
-        song_title = i.getElementsByTagName("title")[0].firstChild.nodeValue
-        url = location_dec(i.getElementsByTagName("location")[0].firstChild.nodeValue)
+        song_id=song_title=url=""
+        try:
+            song_id = i.getElementsByTagName("song_id")[0].firstChild.nodeValue
+            artist = i.getElementsByTagName("artist")[0].firstChild.nodeValue
+            song_title = i.getElementsByTagName("title")[0].firstChild.nodeValue
+            url = location_dec(i.getElementsByTagName("location")[0].firstChild.nodeValue)
+        except:
+            log.e("Song %s failed. [Info Missing] artist:%s, album:%s, title:%s, url:%s" % (song_id, artist, album_name, song_title, url))
+            continue
         try:
             lrc_url = i.getElementsByTagName("lyric")[0].firstChild.nodeValue
         except:
@@ -131,7 +137,7 @@ def xiami_download_album(aid, output_dir = '.', merge = True, info_only = False)
 
         print_info(site_info, song_title, type, size)
         if not info_only:
-            file_name = "%02d.%s" % (track_nr, song_title)
+            file_name = "%02d.%s - %s - %s" % (track_nr, song_title, artist, album_name)
             download_urls([url], file_name, ext, size, output_dir, merge = merge, faker = True)
             try:
                 xiami_download_lyric(lrc_url, file_name, output_dir)
