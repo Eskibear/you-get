@@ -153,7 +153,7 @@ def ffmpeg_concat_mp4_to_mp4(files, output='output.mp4'):
 
         params = [FFMPEG, '-f', 'concat', '-y', '-i']
         params.append(output + '.txt')
-        params += ['-c', 'copy', output]
+        params += ['-c', 'copy', '-absf', 'aac_adtstoasc', output]
 
         if subprocess.call(params) == 0:
             os.remove(output + '.txt')
