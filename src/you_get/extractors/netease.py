@@ -38,7 +38,11 @@ def netease_cloud_music_download(url, output_dir='.', merge=True, info_only=Fals
             download_urls([cover_url], "cover", "jpg", 0, new_dir)
 
         for i in j['result']['tracks']:
-            netease_song_download(i, output_dir=new_dir, info_only=info_only)
+            try:
+                netease_song_download(i, output_dir=new_dir, info_only=info_only)
+            except:
+                log.e(i['name'])
+                pass
 
     elif "song" in url:
         j = loads(get_content("http://music.163.com/api/song/detail/?id=%s&ids=[%s]&csrf_token=" % (rid, rid), headers={"Referer": "http://music.163.com/"}))
